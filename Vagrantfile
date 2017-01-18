@@ -82,7 +82,7 @@ Vagrant.configure("2") do |config|
      systemctl restart apache2.service
      systemctl enable apache2.service
      update-rc.d mysql enable
-     echo "*/15 * * * * /usr/bin/php /var/www/html/functions/scripts/pingCheck.php" >> /etc/crontab
-     echo "*/15 * * * * /usr/bin/php /var/www/html/functions/scripts/discoveryCheck.php" >> /etc/crontab
+     echo "*/15 * * * * root /usr/bin/php /var/www/html/functions/scripts/pingCheck.php" >> /etc/crontab
+     echo "*/15 * * * * root /usr/bin/php /var/www/html/functions/scripts/discoveryCheck.php" >> /etc/crontab
   SHELL
 end
