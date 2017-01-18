@@ -74,11 +74,13 @@ Vagrant.configure("2") do |config|
      a2enmod rewrite
      a2enmod ssl
      a2ensite default-ssl
-     echo -e "\n\nvagrant\nvagrant\n\n\n\n\n\n " | mysql_secure_installation 2>/dev/null
+     echo -e "\n\nvagrant\nvagrant\n\n\n\n\n\n" | mysql_secure_installation 2>/dev/null
      mysql -u root --password=vagrant -e "CREATE USER 'phpipam'@'localhost' IDENTIFIED BY 'phpipamadmin'; GRANT ALL PRIVILEGES ON *.* TO 'phpipam'@'localhost' WITH GRANT OPTION; FLUSH PRIVILEGES;"
      rm /var/www/html/index.html
      git clone https://github.com/phpipam/phpipam.git /var/www/html/.
      cp -a /var/www/html/config.dist.php /var/www/html/config.php
+     sed -i '/<\\\/VirtualHost>/i\\\\t<Directory /var/www/html/>\\n\\t\\tOptions FollowSymLinks\\n\\t\\tAllowOverride all\\n\\t\\tOrder allow,deny\\n\\t\\tAllow from all\\n\\t<\\\/Directory>' /etc/apache2/sites-enabled/000-default.conf
+     sed -i '/<\\\/VirtualHost>/i\\\\t\\t<Directory /var/www/html/>\\n\\t\\t\\tOptions FollowSymLinks\\n\\t\\t\\tAllowOverride all\\n\\t\\t\\tOrder allow,deny\\n\\t\\t\\tAllow from all\\n\\t\\t<\\\/Directory>' /etc/apache2/sites-enabled/default-ssl.conf
      systemctl restart apache2.service
      systemctl enable apache2.service
      update-rc.d mysql enable
