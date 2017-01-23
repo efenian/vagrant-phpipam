@@ -1,6 +1,29 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+branch = "1.2"
+
+$script = <<SCRIPT
+apt-get update
+apt-get install -y apache2 libapache2-mod-php mariadb-server php-gmp php-pear php-mysql php-ldap apache2-utils php-mbstring php-gd php-mcrypt php-curl git
+a2enmod rewrite
+a2enmod ssl
+a2ensite default-ssl
+echo -e "\n\nvagrant\nvagrant\n\n\n\n\n\n" | mysql_secure_installation 2>/dev/null
+mysql -u root --password=vagrant -e "CREATE USER 'phpipam'@'localhost' IDENTIFIED BY 'phpipamadmin'; GRANT ALL PRIVILEGES ON *.* TO 'phpipam'@'localhost' WITH GRANT OPTION; FLUSH PRIVILEGES;"
+rm /var/www/html/index.html
+git clone -b #{branch} https://github.com/phpipam/phpipam.git /var/www/html/.
+cp -a /var/www/html/config.dist.php /var/www/html/config.php
+sed -i '/<\\\/VirtualHost>/i\\\\t<Directory /var/www/html/>\\n\\t\\tOptions FollowSymLinks\\n\\t\\tAllowOverride all\\n\\t\\tOrder allow,deny\\n\\t\\tAllow from all\\n\\t<\\\/Directory>' /etc/apache2/sites-enabled/000-default.conf
+sed -i '/<\\\/VirtualHost>/i\\\\t\\t<Directory /var/www/html/>\\n\\t\\t\\tOptions FollowSymLinks\\n\\t\\t\\tAllowOverride all\\n\\t\\t\\tOrder allow,deny\\n\\t\\t\\tAllow from all\\n\\t\\t<\\\/Directory>' /etc/apache2/sites-enabled/default-ssl.conf
+systemctl restart apache2.service
+systemctl enable apache2.service
+update-rc.d mysql enable
+echo "*/15 * * * * root /usr/bin/php /var/www/html/functions/scripts/pingCheck.php" >> /etc/crontab
+echo "*/15 * * * * root /usr/bin/php /var/www/html/functions/scripts/discoveryCheck.php" >> /etc/crontab
+SCRIPT
+
+
 # All Vagrant configuration is done below. The "2" in Vagrant.configure
 # configures the configuration version (we support older styles for
 # backwards compatibility). Please don't change it unless you know what
@@ -51,7 +74,7 @@ Vagrant.configure("2") do |config|
   #   # Customize the amount of memory on the VM:
      vb.name =  "phpipam"
      vb.memory = "1024"
-     vb.cpus = "2"
+     vb.cpus = "1"
   end
   #
   # View the documentation for the provider you are using for more
@@ -67,24 +90,5 @@ Vagrant.configure("2") do |config|
   # Enable provisioning with a shell script. Additional provisioners such as
   # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
   # documentation for more information about their specific syntax and use.
-  config.vm.provision "shell", inline: <<-SHELL
-     apt-get update
-     apt-get install -y apache2 libapache2-mod-php mariadb-server php-gmp php-pear php-mysql php-ldap apache2-utils php-mbstring php-gd php-mcrypt php-curl git
-     phpenmod mod_rewrite
-     a2enmod rewrite
-     a2enmod ssl
-     a2ensite default-ssl
-     echo -e "\n\nvagrant\nvagrant\n\n\n\n\n\n" | mysql_secure_installation 2>/dev/null
-     mysql -u root --password=vagrant -e "CREATE USER 'phpipam'@'localhost' IDENTIFIED BY 'phpipamadmin'; GRANT ALL PRIVILEGES ON *.* TO 'phpipam'@'localhost' WITH GRANT OPTION; FLUSH PRIVILEGES;"
-     rm /var/www/html/index.html
-     git clone https://github.com/phpipam/phpipam.git /var/www/html/.
-     cp -a /var/www/html/config.dist.php /var/www/html/config.php
-     sed -i '/<\\\/VirtualHost>/i\\\\t<Directory /var/www/html/>\\n\\t\\tOptions FollowSymLinks\\n\\t\\tAllowOverride all\\n\\t\\tOrder allow,deny\\n\\t\\tAllow from all\\n\\t<\\\/Directory>' /etc/apache2/sites-enabled/000-default.conf
-     sed -i '/<\\\/VirtualHost>/i\\\\t\\t<Directory /var/www/html/>\\n\\t\\t\\tOptions FollowSymLinks\\n\\t\\t\\tAllowOverride all\\n\\t\\t\\tOrder allow,deny\\n\\t\\t\\tAllow from all\\n\\t\\t<\\\/Directory>' /etc/apache2/sites-enabled/default-ssl.conf
-     systemctl restart apache2.service
-     systemctl enable apache2.service
-     update-rc.d mysql enable
-     echo "*/15 * * * * root /usr/bin/php /var/www/html/functions/scripts/pingCheck.php" >> /etc/crontab
-     echo "*/15 * * * * root /usr/bin/php /var/www/html/functions/scripts/discoveryCheck.php" >> /etc/crontab
-  SHELL
+  config.vm.provision "shell", inline: $script
 end
