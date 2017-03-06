@@ -2,9 +2,11 @@
 # vi: set ft=ruby :
 
 branch = "1.2"
+password = "password"
 
 $script = <<SCRIPT
 apt-get update
+DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dist-upgrade
 apt-get install -y apache2 libapache2-mod-php mariadb-server php-gmp php-pear php-mysql php-ldap apache2-utils php-mbstring php-gd php-mcrypt php-curl git
 a2enmod rewrite
 a2enmod ssl
@@ -21,6 +23,8 @@ systemctl enable apache2.service
 update-rc.d mysql enable
 echo "*/15 * * * * root /usr/bin/php /var/www/html/functions/scripts/pingCheck.php" >> /etc/crontab
 echo "*/15 * * * * root /usr/bin/php /var/www/html/functions/scripts/discoveryCheck.php" >> /etc/crontab
+curl -s -k -H 'X-Requested-With: XMLHttpRequest' --form mysqlrootuser=phpipam --form mysqlroorpass=phpipamadmin --form createdb=on --form creategrants=on https://127.0.0.1/app/install/install-execute.php
+curl -s -k -H 'X-Requested-With: XMLHttpRequest' --form password1=#{password} --form password2=#{password} --form siteTitle=phpipam https://127.0.0.1/app/install/postinstall_submit.php
 SCRIPT
 
 
