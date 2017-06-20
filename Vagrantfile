@@ -7,7 +7,7 @@ password = "password"
 $script = <<SCRIPT
 apt-get update
 DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dist-upgrade
-apt-get install -y apache2 libapache2-mod-php mariadb-server php-gmp php-pear php-mysql php-ldap apache2-utils php-mbstring php-gd php-mcrypt php-curl git
+apt-get install -y apache2 libapache2-mod-php mariadb-server php-gmp php-pear php-mysql php-ldap apache2-utils php-mbstring php-gd php-mcrypt php-curl git php-snmp snmp-mibs-downloader
 a2enmod rewrite
 a2enmod ssl
 a2ensite default-ssl
