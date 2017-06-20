@@ -1,7 +1,7 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-branch = "1.2"
+branch = "1.3"
 password = "password"
 
 $script = <<SCRIPT
