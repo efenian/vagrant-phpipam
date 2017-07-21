@@ -1,4 +1,4 @@
-# phpipamvagrant
+# vagrant-phpipam
 
 
 * Browse to [https://192.168.16.30/](https://192.168.16.30/) or [http://192.168.16.30/](http://192.168.16.30/)
